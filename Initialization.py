@@ -76,7 +76,9 @@ class IniGraph():
 
     def setNodeWallet(self, product_name, upper):
         # -- set node's personal budget (wallet) --
-        fw = open("data/" + self.dataname + "/" + self. dataname + "_wallet_r" + list(product_name)[6] + "p" + list(product_name)[8] + "n" + list(product_name)[10] + ".txt", 'w')
+        fw = open("data/" + self.dataname + "/" + self. dataname + "_wallet_r" + list(product_name)[list(product_name).index('r') + 1] +
+                  "p" + list(product_name)[list(product_name).index('p') + 1] +
+                  "n" + list(product_name)[list(product_name).index('n') + 1] + ".txt", 'w')
         with open(self.data_degree_path) as f:
             for line in f:
                 (key, val) = line.split()
@@ -87,7 +89,9 @@ class IniGraph():
 
     def getWalletList(self, product_name):
         wallet_list = []
-        with open("data/" + self.dataname + "/" + self. dataname + "_wallet_r" + list(product_name)[6] + "p" + list(product_name)[8] + "n" + list(product_name)[10] + ".txt") as f:
+        with open("data/" + self.dataname + "/" + self. dataname + "_wallet_r" + list(product_name)[list(product_name).index('r') + 1] +
+                  "p" + list(product_name)[list(product_name).index('p') + 1] +
+                  "n" + list(product_name)[list(product_name).index('n') + 1] + ".txt") as f:
             for line in f:
                 (nnode, wallet) = line.split()
                 wallet_list.append(float(wallet))
@@ -220,7 +224,7 @@ if __name__ == "__main__":
     ### num_price: (int) the kinds of generated price
     ### num_ratio: (int) the kinds of generated ratio
     data_name = "email"
-    product_name = "item_r1p3n1"
+    product_name = "item_r1p3n2"
     num_ratio, num_price = int(list(product_name)[list(product_name).index('r') + 1]),  int(list(product_name)[list(product_name).index('p') + 1])
 
     iniG = IniGraph(data_name)
@@ -231,7 +235,7 @@ if __name__ == "__main__":
 
     # graph_dict = iniG.constructGraphDict()
     # seedcost_dict = iniG.constructSeedCostDict()
-    iniP.setProductListSingleRandomRatioMultiFixIntervalPrice(num_price)
+    # iniP.setProductListSingleRandomRatioMultiFixIntervalPrice(num_price)
     product_list, sum_price = iniP.getProductlist(product_name)
-    # iniG.setNodeWallet(product_name, sum_price)
+    iniG.setNodeWallet(product_name, sum_price)
     # wallet_list = iniG.getWalletList(product_name)
