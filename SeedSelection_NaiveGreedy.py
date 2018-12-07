@@ -1,5 +1,6 @@
 import time
 import copy
+import numpy as np
 from Initialization import *
 from Diffusion_NormalIC import *
 
@@ -105,9 +106,7 @@ class SeedSelection_NG():
         ### expect_profit_list: (list) the list of expected profit for all combinations of nodes and products
         ### expect_profit_list[k]: (list) the list of expected profit for k-product
         ### expect_profit_list[k][i]: (float4) the expected profit for i-node for k-product
-        expect_profit_list = []
-        for k in range(self.num_product):
-            expect_profit_list.append([])
+        expect_profit_list = [[] for _ in range(self.num_product)]
 
         ssng = SeedSelection_NG(self.graph_dict, self.seed_cost_dict, self.product_list, self.total_budget, self.pps, self.winob)
 
@@ -140,11 +139,10 @@ class SeedSelection_NG():
         mep = [0.0, 0, '-1']
 
         for k in range(self.num_product):
-            ep_listk = ep_list[k]
             for i in nb_set[k]:
                 # -- choose the better seed --
-                if ep_listk[int(i)] > mep[0]:
-                    mep = [ep_listk[int(i)], k, i]
+                if ep_list[k][int(i)] > mep[0]:
+                    mep = [ep_list[k][int(i)], k, i]
 
         return mep[1], mep[2]
 
@@ -154,9 +152,8 @@ class SeedSelection_NG():
 
         ssng = SeedSelection_NG(self.graph_dict, self.seed_cost_dict, self.product_list, self.total_budget, self.pps, self.winob)
         for k in range(self.num_product):
-            ep_listk = ep_list[k]
             for i in nb_set[k]:
-                ep_listk[int(i)] = ssng.getSeedExpectProfit(k, i, a_n_set[k], cur_w_list, pp_list[k])
+                ep_list[k][int(i)] = ssng.getSeedExpectProfit(k, i, a_n_set[k], cur_w_list, pp_list[k])
 
                 # -- the cost of seed cannot exceed the budget --
                 if self.seed_cost_dict[i] + cur_budget > self.total_budget:
@@ -164,7 +161,7 @@ class SeedSelection_NG():
                     continue
 
                 # -- the expected profit cannot be negative --
-                if ep_listk[int(i)] <= 0:
+                if ep_list[k][int(i)] <= 0:
                     ban_set[k].add(i)
                     continue
 
