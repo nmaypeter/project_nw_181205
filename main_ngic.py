@@ -1,7 +1,7 @@
 from SeedSelection_NaiveGreedy import *
 
 if __name__ == "__main__":
-    for pp_strategy in range(1, 4):
+    for pp_strategy in range(1, 2):
         data_name, product_name = "", ""
         for setting in range(1, 2):
             # print("setting = " + str(setting))
@@ -75,7 +75,7 @@ if __name__ == "__main__":
                             now_profit += current_k_profit
                             now_budget += current_k_budget
                             # print("updateProfitList")
-                            expect_profit_list = ssng.updateProfitList(expect_profit_list, nban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
+                            expect_profit_list, nban_set = ssng.updateProfitList(expect_profit_list, nban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
                             # print("getMostValuableSeed")
                             mep_k_prod, mep_i_node = ssng.getMostValuableSeed(expect_profit_list, nban_set)
 
@@ -92,6 +92,7 @@ if __name__ == "__main__":
                         print("total_time: " + str(how_long) + "sec")
                         print(result[times])
                         print("avg_profit = " + str(round(avg_profit / (times+1), 4)) + ", avg_budget = " + str(round(avg_budget / (times+1), 4)))
+                        print("------------------------------------------")
 
                         if (times + 1) % etimes == 0:
                             # print("output1")
