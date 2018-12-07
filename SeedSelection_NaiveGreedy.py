@@ -1,4 +1,5 @@
 import time
+import copy
 from Initialization import *
 from Diffusion_NormalIC import *
 
@@ -41,8 +42,7 @@ class SeedSelection_NG():
         ### try_a_n_list[][1]: (float4) the probability to activate the receiver from i
         ### try_a_n_list[][2]: (float2) the personal probability to activate ownself
         ### ep: (float2) the expected profit
-        temp_a_n_set = a_n_set_k.copy()
-        temp_a_n_set.add(i_node)
+        temp_a_n_set = {i_node}
         try_a_n_list = []
         ep = -1 * self.seed_cost_dict[i_node]
 
@@ -57,29 +57,32 @@ class SeedSelection_NG():
         for out in outdict:
             if not (float(outdict[out]) >= self.diffusion_threshold):
                 continue
-            if not (out not in temp_a_n_set):
+            if not (out not in a_n_set_k):
                 continue
             if not (cur_w_list[int(out)] > prodk[2]):
                 continue
             if not (pp_list_k[int(out)] > 0):
                 continue
-            # --- node, edge weight, personal prob. ---
-            try_a_n_list.append([out,  float(outdict[out]), pp_list_k[int(out)]])
-
-        while len(try_a_n_list) > 0:
             # -- add the value calculated by activated probability * profit of this product --
-            ### try_node: (list) the nodes may be activated for k-products
-            try_node = try_a_n_list.pop()
-            ep += try_node[1] * try_node[2] * prodk[0]
+            ep += float(outdict[out]) * pp_list_k[int(out)] * prodk[0]
+            # -- activate the receivers temporally --
             # -- add the receiver of node into try_a_n_list --
             # -- notice: prevent the node from owing no receiver --
+            temp_a_n_set.add(out)
+            # --- node, edge weight, personal prob. ---
+            try_a_n_list.append([out,  float(outdict[out])])
+
+        while len(try_a_n_list) > 0:
+
+            ### try_node: (list) the nodes may be activated for k-products
+            try_node = try_a_n_list.pop()
             if try_node[0] not in self.graph_dict:
                 continue
-            # -- activate the receivers temporally --
-            temp_a_n_set.add(try_node[0])
             outdictw = self.graph_dict[try_node[0]]
             for outw in outdictw:
                 if not (try_node[1] * float(outdictw[outw]) >= self.diffusion_threshold):
+                    continue
+                if not (outw not in a_n_set_k):
                     continue
                 if not (outw not in temp_a_n_set):
                     continue
@@ -87,7 +90,14 @@ class SeedSelection_NG():
                     continue
                 if not (pp_list_k[int(outw)] > 0):
                     continue
-                try_a_n_list.append([outw, round(try_node[1] * float(outdictw[outw]), 4), pp_list_k[int(outw)]])
+                # -- add the value calculated by activated probability * profit of this product --
+                ep += try_node[1] * float(outdictw[outw]) * pp_list_k[int(outw)] * prodk[0]
+                # -- activate the receivers temporally --
+                # -- add the receiver of node into try_a_n_list --
+                # -- notice: prevent the node from owing no receiver --
+                temp_a_n_set.add(outw)
+                try_a_n_list.append([outw, round(try_node[1] * float(outdictw[outw]), 4)])
+
         return round(ep, 4)
 
     def calAllSeedProfit(self, cur_w_list):
@@ -99,18 +109,18 @@ class SeedSelection_NG():
         for k in range(self.num_product):
             expect_profit_list.append([])
 
-        mngic = SeedSelection_NG(self.graph_dict, self.seed_cost_dict, self.product_list, self.total_budget, self.pps, self.winob)
+        ssng = SeedSelection_NG(self.graph_dict, self.seed_cost_dict, self.product_list, self.total_budget, self.pps, self.winob)
 
         ### notban_set: (list) the possible seed set
         ### notban_set[k]: (set) the possible seed set for k-product
-        notban_set = [set(graph_dict.keys()) for _ in range(num_product)]
+        notban_set = [set(self.graph_dict.keys()) for _ in range(self.num_product)]
         for k in range(self.num_product):
             prodk = self.product_list[k]
             for i in self.seed_cost_dict:
                 if i not in self.graph_dict:
                     ep = prodk[0] - self.seed_cost_dict[i]
                 else:
-                    ep = mngic.getSeedExpectProfit(k, i, set(), cur_w_list, [1.0] * self.num_node)
+                    ep = ssng.getSeedExpectProfit(k, i, set(), cur_w_list, [1.0] * self.num_node)
                 expect_profit_list[k].append(ep)
 
                 # -- the cost of seed cannot exceed the budget --
@@ -142,11 +152,11 @@ class SeedSelection_NG():
         ### ban_set: (list) the set to record the node that will be banned
         ban_set = [set() for _ in range(self.num_product)]
 
-        mngic = SeedSelection_NG(self.graph_dict, self.seed_cost_dict, self.product_list, self.total_budget, self.pps, self.winob)
+        ssng = SeedSelection_NG(self.graph_dict, self.seed_cost_dict, self.product_list, self.total_budget, self.pps, self.winob)
         for k in range(self.num_product):
             ep_listk = ep_list[k]
             for i in nb_set[k]:
-                ep_listk[int(i)] = mngic.getSeedExpectProfit(k, i, a_n_set[k], cur_w_list, pp_list[k])
+                ep_listk[int(i)] = ssng.getSeedExpectProfit(k, i, a_n_set[k], cur_w_list, pp_list[k])
 
                 # -- the cost of seed cannot exceed the budget --
                 if self.seed_cost_dict[i] + cur_budget > self.total_budget:
@@ -172,7 +182,7 @@ if __name__ == "__main__":
     product_name = "item_r1p3n1"
     total_budget = 1
     execution_times = 10
-    pp_strategy = 1
+    pp_strategy = 2
     whether_infect_not_only_buying = bool(0)
 
     iniG = IniGraph(data_name)
@@ -188,22 +198,31 @@ if __name__ == "__main__":
     num_node = len(seed_cost_dict)
     num_product = len(product_list)
 
-    mngic = SeedSelection_NG(graph_dict, seed_cost_dict, product_list, total_budget, pp_strategy, whether_infect_not_only_buying)
-    dnic = D_NormalIC(graph_dict, seed_cost_dict, product_list, total_budget, pp_strategy, whether_infect_not_only_buying)
+    start_time = time.time()
 
+    # -- initialization for each budget --
     ### result: (list) [profit, budget, seed number per product, customer number per product, seed set] in this execution_time
     result = []
     ### avg_profit, avg_budget: (float) the average profit and budget per execution_time
-    ### now_profit, now_budget: (float) the profit and budget in this execution_time
     ### avg_num_k_seed: (list) the list to record the average number of seed for products per execution_time
     ### avg_num_k_seed[k]: (int) the average number of seed for k-product per execution_time
     ### avg_num_k_an: (list) the list to record the average number of activated node for products per execution_time
     ### avg_num_k_an[k]: (int) the average number of activated node for k-product per execution_time
-    avg_profit, avg_budget, now_profit, now_budget = 0.0, 0.0, 0.0, 0.0
+    avg_profit, avg_budget = 0.0, 0.0
     avg_num_k_seed, avg_num_k_an = [0 for _ in range(num_product)], [0 for _ in range(num_product)]
     ### pro_k_list, bud_k_list: (list) the list to record profit and budget for products
     ### pro_k_list[k], bud_k_list[k]: (float) the list to record profit and budget for k-product
     pro_k_list, bud_k_list = [0.0 for _ in range(num_product)], [0.0 for _ in range(num_product)]
+
+    ssng = SeedSelection_NG(graph_dict, seed_cost_dict, product_list, total_budget, pp_strategy, whether_infect_not_only_buying)
+    dnic = D_NormalIC(graph_dict, seed_cost_dict, product_list, total_budget, pp_strategy, whether_infect_not_only_buying)
+
+    # print("calAllSeedProfit")
+    all_profit_list, notban_set = ssng.calAllSeedProfit(wallet_list)
+
+    # -- initialization for each execution_times --
+    ### now_profit, now_budget: (float) the profit and budget in this execution_time
+    now_profit, now_budget = 0.0, 0.0
     ### seed_set: (list) the seed set
     ### seed_set[k]: (set) the seed set for k-product
     ### activated_node_set: (list) the activated node set
@@ -213,34 +232,29 @@ if __name__ == "__main__":
     ### personal_prob_list[k]: (list) the list of personal prob. for k-product
     ### personal_prob_list[k][i]: (float2) the personal prob. for i-node for k-product
     personal_prob_list = [[1.0 for _ in range(num_node)] for _ in range(num_product)]
-    current_wallet_list = wallet_list.copy()
+    current_wallet_list = copy.deepcopy(wallet_list)
+    expect_profit_list = copy.deepcopy(all_profit_list)
+    nban_set = copy.deepcopy(notban_set)
 
-    start_time = time.time()
-
-    print("calAllSeedProfit")
-    all_profit_list, notban_set = mngic.calAllSeedProfit(wallet_list)
-    expect_profit_list = all_profit_list.copy()
-    nban_set = notban_set.copy()
-
-    print("getMostValuableSeed")
-    mep_k_prod, mep_i_node, nban_set = mngic.getMostValuableSeed(expect_profit_list, nban_set)
+    # print("getMostValuableSeed")
+    mep_k_prod, mep_i_node, nban_set = ssng.getMostValuableSeed(expect_profit_list, nban_set)
 
     # -- main --
     while now_budget < total_budget and mep_i_node != '-1':
-        print("addSeedIntoSeedSet")
+        # print("addSeedIntoSeedSet")
         seed_set, activated_node_set, nban_set, current_k_profit, current_k_budget, current_wallet_list, personal_prob_list = \
             dnic.insertSeedIntoSeedSet(mep_k_prod, mep_i_node, seed_set, activated_node_set, nban_set, current_wallet_list, personal_prob_list)
         pro_k_list[mep_k_prod] += round(current_k_profit, 4)
         bud_k_list[mep_k_prod] += round(current_k_budget, 4)
         now_profit += current_k_profit
         now_budget += current_k_budget
-        print(pro_k_list, bud_k_list, now_profit, now_budget)
-        print("updateProfitList")
-        expect_profit_list = mngic.updateProfitList(expect_profit_list, nban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
-        print("getMostValuableSeed")
-        mep_k_prod, mep_i_node, nban_set = mngic.getMostValuableSeed(expect_profit_list, nban_set)
+        # print(pro_k_list, bud_k_list, now_profit, now_budget)
+        # print("updateProfitList")
+        expect_profit_list = ssng.updateProfitList(expect_profit_list, nban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
+        # print("getMostValuableSeed")
+        mep_k_prod, mep_i_node, nban_set = ssng.getMostValuableSeed(expect_profit_list, nban_set)
 
-    print("result")
+    # print("result")
     now_num_k_seed, now_num_k_an = [len(k) for k in seed_set], [len(k) for k in activated_node_set]
     result.append([round(now_profit, 4), round(now_budget, 4), now_num_k_seed, now_num_k_an, seed_set])
     avg_profit += now_profit
