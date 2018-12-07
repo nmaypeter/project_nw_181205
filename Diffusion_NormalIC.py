@@ -26,15 +26,12 @@ class D_NormalIC():
         self.pps = pps
         self.winob = whether_infect_not_only_buying
 
-    def insertSeedIntoSeedSet(self, k_prod, i_node, s_set, a_n_set, nb_set, cur_w_list, pp_list):
+    def insertSeedIntoSeedSet(self, k_prod, i_node, s_set, a_n_set, cur_w_list, pp_list):
         # -- add the seed with maximum expected profit into seed set --
         s_set[k_prod].add(i_node)
         a_n_set[k_prod].add(i_node)
         for k in range(self.num_product):
-            pp_listk = pp_list[k]
-            if i_node in nb_set[k]:
-                nb_set[k].remove(i_node)
-            pp_listk[int(i_node)] = 0
+            pp_list[k][int(i_node)] = 0
         # print("into seedset: " + str(mep[2]))
         prodk = self.product_list[k]
         ppk = pp_list[k_prod]
@@ -49,7 +46,7 @@ class D_NormalIC():
         # -- add the receivers of seed into try_a_n_list --
         # -- notice: prevent the seed from owing no receiver --
         if i_node not in self.graph_dict:
-            return s_set, a_n_set, nb_set, cur_profit, cur_budget, cur_w_list, pp_list
+            return s_set, a_n_set, cur_profit, cur_budget, cur_w_list, pp_list
 
         outdict = self.graph_dict[i_node]
         for out in outdict:
@@ -90,7 +87,7 @@ class D_NormalIC():
                     if not (ppk[int(outw)] > 0):
                         continue
                     try_a_n_list.append([outw, try_node[1] * float(outdictw[outw]), ppk[int(outw)]])
-        return s_set, a_n_set, nb_set, cur_profit, cur_budget, cur_w_list, pp_list
+        return s_set, a_n_set, cur_profit, cur_budget, cur_w_list, pp_list
 
     def updatePersonalProbList(self, k_prod, i_node, cur_w_list, pp_list):
         prodprice = self.product_list[k_prod][2]
