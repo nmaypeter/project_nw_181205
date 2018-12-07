@@ -58,17 +58,13 @@ if __name__ == "__main__":
 
                         # print("getMostValuableSeed")
                         high_degree_set = copy.deepcopy(high_degree_set_o)
-                        print(len(high_degree_set))
                         expect_profit_list, high_degree_set, ban_set = sshd.calHighDegreeSeedProfit(high_degree_set, ban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
-                        print(len(high_degree_set))
                         mep_k_prod, mep_i_node = sshd.getMostValuableSeed(expect_profit_list)
 
                         # -- main --
                         while now_budget < bud and mep_i_node != '-1':
-                            print(now_budget, len(high_degree_set))
                             # print("addSeedIntoSeedSet")
                             high_degree_set.remove(mep_i_node)
-                            print(len(high_degree_set))
                             seed_set, activated_node_set, current_k_profit, current_k_budget, current_wallet_list, personal_prob_list = \
                                 dnic.insertSeedIntoSeedSet(mep_k_prod, mep_i_node, seed_set, activated_node_set, current_wallet_list, personal_prob_list)
                             pro_k_list[mep_k_prod] += round(current_k_profit, 4)
@@ -77,9 +73,7 @@ if __name__ == "__main__":
                             now_budget += current_k_budget
                             if len(high_degree_set) == 0:
                                 high_degree_set = sshd.getHighDegreeSet(degree_dict)
-                            print(len(high_degree_set))
                             expect_profit_list, high_degree_set, ban_set = sshd.calHighDegreeSeedProfit(high_degree_set, ban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
-                            print(len(high_degree_set))
                             mep_k_prod, mep_i_node = sshd.getMostValuableSeed(expect_profit_list)
 
                         # print("result")
@@ -95,10 +89,11 @@ if __name__ == "__main__":
                         print("total_time: " + str(how_long) + "sec")
                         print(result[times])
                         print("avg_profit = " + str(round(avg_profit / (times+1), 4)) + ", avg_budget = " + str(round(avg_budget / (times+1), 4)))
+                        print("------------------------------------------")
 
                         if (times + 1) % etimes == 0:
                             # print("output1")
-                            fw = open("result/mngic_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
+                            fw = open("result/mhdic_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
                                       data_name + "_" + product_name + "/" +
                                       data_name + "_" + product_name + "_b" + str(bud) + "_i" + str(times + 1) + ".txt", 'w')
                             fw.write("data = " + data_name + ", total_budget = " + str(bud) + ", iteration_times = " + str(times + 1) + "\n" +
@@ -131,21 +126,21 @@ if __name__ == "__main__":
                             result_totaltime_list[int((times + 1) / etimes) - 1].append(str(how_long) + "\t")
 
                 # print("output2")
-                fw = open("result/mngic_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
+                fw = open("result/mhdic_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
                           data_name + "_" + product_name + "_profit.txt", 'w')
                 for line in result_profit_list:
                     for l in line:
                         fw.write(str(l))
                     fw.write("\n")
                 fw.close()
-                fw = open("result/mngic_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
+                fw = open("result/mhdic_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
                           data_name + "_" + product_name + "_avgtime.txt", 'w')
                 for line in result_avgtime_list:
                     for l in line:
                         fw.write(str(l))
                     fw.write("\n")
                 fw.close()
-                fw = open("result/mngic_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
+                fw = open("result/mhdic_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
                           data_name + "_" + product_name + "_totaltime.txt", 'w')
                 for line in result_totaltime_list:
                     for l in line:
