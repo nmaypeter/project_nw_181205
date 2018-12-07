@@ -174,7 +174,7 @@ class SeedSelection_NG():
                 if i in nb_set[k]:
                     nb_set[k].remove(i)
 
-        return ep_list
+        return ep_list, nb_set
 
 if __name__ == "__main__":
     ### whether_infect_not_only_buying: (bool) if infect when only after buying, then False
@@ -250,7 +250,7 @@ if __name__ == "__main__":
         now_budget += current_k_budget
         # print(pro_k_list, bud_k_list, now_profit, now_budget)
         # print("updateProfitList")
-        expect_profit_list = ssng.updateProfitList(expect_profit_list, nban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
+        expect_profit_list, nban_set = ssng.updateProfitList(expect_profit_list, nban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
         # print("getMostValuableSeed")
         mep_k_prod, mep_i_node, nban_set = ssng.getMostValuableSeed(expect_profit_list, nban_set)
 
