@@ -60,13 +60,16 @@ if __name__ == "__main__":
                         nban_set = copy.deepcopy(notban_set)
 
                         # print("getMostValuableSeed")
-                        mep_k_prod, mep_i_node, nban_set = ssng.getMostValuableSeed(expect_profit_list, nban_set)
+                        mep_k_prod, mep_i_node = ssng.getMostValuableSeed(expect_profit_list, nban_set)
 
                         # -- main --
                         while now_budget < bud and mep_i_node != '-1':
                             # print("addSeedIntoSeedSet")
-                            seed_set, activated_node_set, nban_set, current_k_profit, current_k_budget, current_wallet_list, personal_prob_list = \
-                                dnic.insertSeedIntoSeedSet(mep_k_prod, mep_i_node, seed_set, activated_node_set, nban_set, current_wallet_list, personal_prob_list)
+                            for k in range(num_product):
+                                if mep_i_node in nban_set[k]:
+                                    nban_set[k].remove(mep_i_node)
+                            seed_set, activated_node_set, current_k_profit, current_k_budget, current_wallet_list, personal_prob_list = \
+                                dnic.insertSeedIntoSeedSet(mep_k_prod, mep_i_node, seed_set, activated_node_set, current_wallet_list, personal_prob_list)
                             pro_k_list[mep_k_prod] += round(current_k_profit, 4)
                             bud_k_list[mep_k_prod] += round(current_k_budget, 4)
                             now_profit += current_k_profit
@@ -74,7 +77,7 @@ if __name__ == "__main__":
                             # print("updateProfitList")
                             expect_profit_list = ssng.updateProfitList(expect_profit_list, nban_set, now_budget, activated_node_set, current_wallet_list, personal_prob_list)
                             # print("getMostValuableSeed")
-                            mep_k_prod, mep_i_node, nban_set = ssng.getMostValuableSeed(expect_profit_list, nban_set)
+                            mep_k_prod, mep_i_node = ssng.getMostValuableSeed(expect_profit_list, nban_set)
 
                         # print("result")
                         now_num_k_seed, now_num_k_an = [len(k) for k in seed_set], [len(k) for k in activated_node_set]
