@@ -5,8 +5,6 @@ from Diffusion_NormalIC import *
 
 def sortSecond(val):
     return val[1]
-def sortThird(val):
-    return val[2]
 
 class SeedSelection_HD():
     def __init__(self, graph_dict, seed_cost_dict, product_list, total_budget, pps, whether_infect_not_only_buying):
