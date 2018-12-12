@@ -33,13 +33,16 @@ class SeedSelection_HD():
         self.winob = whether_infect_not_only_buying
 
     def constructDegreeDict(self, dataname):
+        # -- display the degree and the nodes with the degree --
+        ### degreedict: (dict) the degree and the nodes with the degree
+        ### degreedict[deg]: (set) the set for deg-degree nodes
+        degreedict = {}
         with open(IniGraph(dataname).data_degree_path) as f:
             degree_list = []
             for line in f:
                 (node, degree) = line.split()
                 degree_list.append([node, degree])
             degree_list.sort(key=sortSecond, reverse=True)
-            degreedict = {}
             for i_node, i_deg in degree_list:
                 if i_deg in degreedict:
                     degreedict[i_deg].add(i_node)
@@ -48,6 +51,8 @@ class SeedSelection_HD():
         return degreedict
 
     def getHighDegreeSet(self, d_dict):
+        # -- det the set with the highest degree --
+        # -- output: set with the highest degree --
         while d_dict[max(d_dict)] == set():
             if d_dict[max(d_dict)] == set():
                 del d_dict[max(d_dict)]
@@ -122,10 +127,10 @@ class SeedSelection_HD():
         return round(ep, 4)
 
     def calHighDegreeSeedProfit(self, hd_set, b_set, cur_budget, a_n_set, cur_w_list, pp_list):
-        # -- calculate expected profit for all combinations of nodes and products --
-        ### expect_profit_list: (list) the list of expected profit for all combinations of nodes and products
-        ### expect_profit_list[k]: (list) the list of expected profit for k-product
-        ### expect_profit_list[k][i]: (float4) the expected profit for i-node for k-product
+        # -- calculate expected profit for all combinations of nodes in highest-degree set and products --
+        ### ep_list: (list) the list of expected profit for all combinations of nodes and products
+        ### ep_list[k]: (list) the list of expected profit for k-product
+        ### ep_list[k][i]: (float4) the expected profit for i-node for k-product
         ep_list = [[] for _ in range(self.num_product)]
 
         sshd = SeedSelection_HD(self.graph_dict, self.seed_cost_dict, self.product_list, self.total_budget, self.pps, self.winob)
@@ -145,6 +150,7 @@ class SeedSelection_HD():
 
                 ep_listk.append([i, ep])
 
+        ### nhd_set: (set) the set for the impossible seeds
         nhd_set = set()
         for i in hd_set:
             bk = 0
@@ -177,7 +183,7 @@ if __name__ == "__main__":
     ### whether_infect_not_only_buying: (bool) if infect when only after buying, then False
     data_name = "email"
     product_name = "item_r1p3n1"
-    total_budget = 1
+    total_budget = 10
     execution_times = 2
     pp_strategy = 2
     whether_infect_not_only_buying = bool(0)
