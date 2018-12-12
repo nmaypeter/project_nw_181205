@@ -31,8 +31,10 @@ class SeedSelection_R():
         self.winob = whether_infect_not_only_buying
 
     def selectRandomSeed(self, nb_set):
-        k_prod, i_node = -1, '-1'
+        # -- select a seed for a random product randomly
+        ### product_num: (list) record the product number with possible seeds
         product_num = [k for k in range(self.num_product)]
+        k_prod, i_node = -1, '-1'
         while k_prod == -1:
             k_prod = choice(product_num)
             if len(nb_set[k_prod]) == 0:
@@ -44,6 +46,7 @@ class SeedSelection_R():
         return k_prod, i_node
 
     def updateNotbanSet(self, nb_set, cur_budget):
+        # -- remove the impossible seeds --
         ban_set = [set() for _ in range(self.num_product)]
         for k in range(self.num_product):
             for i in nb_set[k]:
