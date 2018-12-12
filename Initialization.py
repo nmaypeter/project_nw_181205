@@ -89,6 +89,7 @@ class IniGraph():
         f.close()
 
     def getWalletList(self, product_name):
+        # -- get wallet_list from file --
         wallet_list = []
         with open("data/" + self.dataname + "/" + self. dataname + "_wallet_r" + list(product_name)[list(product_name).index('r') + 1] +
                   "p" + list(product_name)[list(product_name).index('p') + 1] +
@@ -207,6 +208,7 @@ class IniProduct():
         fw.close()
 
     def getProductlist(self, productname):
+        # -- get product list from file
         ### product_list: (list) [profit, cost, price]
         ### sumprice: (float2) the sum of prices
         product_list = []
