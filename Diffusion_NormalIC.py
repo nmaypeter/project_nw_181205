@@ -108,17 +108,17 @@ class D_NormalIC():
         elif self.pps == 2:
             # -- choose as expensive as possible --
             for k in range(self.num_product):
-                if k == k_prod:
+                if k == k_prod or cur_w_list[int(i_node)] == 0:
                     pp_list[k][int(i_node)] = 0
                 else:
-                    pp_list[k][int(i_node)] = round((prodprice / cur_w_list[int(i_node)]), 4)
+                    pp_list[k][int(i_node)] = max(round((prodprice / cur_w_list[int(i_node)]), 4), 0)
         elif self.pps == 3:
             # -- choose as cheap as possible --
             for k in range(self.num_product):
-                if k == k_prod:
+                if k == k_prod or cur_w_list[int(i_node)] == 0:
                     pp_list[k][int(i_node)] = 0
                 else:
-                    pp_list[k][int(i_node)] = round(1 - (prodprice / cur_w_list[int(i_node)]), 4)
+                    pp_list[k][int(i_node)] = min(round(1 - (prodprice / cur_w_list[int(i_node)]), 4), 0)
 
         minprice = 1.0
         for k in range(self.num_product):
