@@ -11,6 +11,12 @@ if __name__ == "__main__":
             elif setting == 2:
                 data_name = "email"
                 product_name = "item_r1p3n2"
+            elif setting == 3:
+                data_name = "email"
+                product_name = "item_r1p3n1_a"
+            elif setting == 4:
+                data_name = "email"
+                product_name = "item_r1p3n2_a"
             total_budget = 1
             execution_times, etimes = 2, 1
 
@@ -28,10 +34,6 @@ if __name__ == "__main__":
                 # print("winob = " + str(winob))
                 whether_infect_not_only_buying = bool(winob)
 
-                result_profit_list = [[] for _ in range(int(execution_times / etimes))]
-                result_budget_list = [[] for _ in range(int(execution_times / etimes))]
-                result_avgtime_list = [[] for _ in range(int(execution_times / etimes))]
-                result_totaltime_list = [[] for _ in range(int(execution_times / etimes))]
                 result_numseed_list = [[0 for _ in range(num_product)] for _ in range(int(execution_times / etimes))]
                 result_numan_list = [[0 for _ in range(num_product)] for _ in range(int(execution_times / etimes))]
                 for bud in range(1, total_budget + 1):
@@ -41,6 +43,8 @@ if __name__ == "__main__":
                     avg_profit, avg_budget = 0.0, 0.0
                     pro_k_list, bud_k_list = [0.0 for _ in range(num_product)], [0.0 for _ in range(num_product)]
                     avg_num_k_seed, avg_num_k_an = [0 for _ in range(num_product)], [0 for _ in range(num_product)]
+                    mrss_times, mrss_pro, mrss_set = [], [], []
+                    mrss = [0, 0.0, ""]
 
                     ssr = SeedSelection_R(graph_dict, seed_cost_dict, product_list, bud, pp_strategy, whether_infect_not_only_buying)
                     dnic = D_NormalIC(graph_dict, seed_cost_dict, product_list, bud, pp_strategy, whether_infect_not_only_buying)
@@ -58,12 +62,12 @@ if __name__ == "__main__":
                         current_wallet_list = copy.deepcopy(wallet_list)
                         nban_set = copy.deepcopy(notban_set)
 
-                        # print("getMostValuableSeed")
+                        # print("selectRandomSeed")
                         mep_k_prod, mep_i_node = ssr.selectRandomSeed(nban_set)
 
                         # -- main --
                         while now_budget < bud and mep_i_node != '-1':
-                            # print("addSeedIntoSeedSet")
+                            # print("insertSeedIntoSeedSet")
                             for k in range(num_product):
                                 if mep_i_node in nban_set[k]:
                                     nban_set[k].remove(mep_i_node)
@@ -73,7 +77,9 @@ if __name__ == "__main__":
                             bud_k_list[mep_k_prod] += round(current_k_budget, 4)
                             now_profit += current_k_profit
                             now_budget += current_k_budget
+                            # print("updateNotbanSet")
                             nban_set = ssr.updateNotbanSet(nban_set, now_budget)
+                            # print("selectRandomSeed")
                             mep_k_prod, mep_i_node = ssr.selectRandomSeed(nban_set)
 
                         # print("result")
@@ -84,6 +90,19 @@ if __name__ == "__main__":
                         for k in range(num_product):
                             avg_num_k_seed[k] += now_num_k_seed[k]
                             avg_num_k_an[k] += now_num_k_an[k]
+
+                        if seed_set not in mrss_set:
+                            mrss_times.append(1)
+                            mrss_pro.append(now_profit)
+                            mrss_set.append(seed_set)
+                        else:
+                            i = mrss_set.index(seed_set)
+                            mrss_times[i] += 1
+                            mrss_pro[i] += now_profit
+                        i = mrss_set.index(seed_set)
+                        if (mrss_times[i] > mrss[0]) or (
+                                (mrss_times[i] == mrss[0]) and (mrss_pro[i] / mrss_times[i]) > (mrss[1] / mrss[0])):
+                            mrss = [mrss_times[i], mrss_pro[i], seed_set]
 
                         how_long = round(time.time() - start_time, 4)
                         print("total_time: " + str(how_long) + "sec")
@@ -100,7 +119,7 @@ if __name__ == "__main__":
                                      "whether_infect_not_only_buying = " + str(whether_infect_not_only_buying) + "\n" +
                                      "avg_profit_per_iteration = " + str(round(avg_profit / (times + 1), 4)) + "\n" +
                                      "avg_budget_per_iteration = " + str(round(avg_budget / (times + 1), 4)) + "\n" +
-                                     "total_time: " + str(how_long) + ", avg_time = " + str(round(how_long / (times + 1), 4)) + "\n")
+                                     "total_time = " + str(how_long) + ", avg_time = " + str(round(how_long / (times + 1), 4)) + "\n")
                             fw.write("\nprofit_ratio =")
                             for k in range(num_product):
                                 fw.write(" " + str(round(pro_k_list[k] / (times + 1), 4)))
@@ -113,37 +132,10 @@ if __name__ == "__main__":
                             fw.write("\ncustomer_number =")
                             for k in range(num_product):
                                 fw.write(" " + str(round(avg_num_k_an[k] / (times + 1), 4)))
-                            fw.write("\n")
+                            fw.write("\n\n")
+                            mrss = [mrss[0], round(mrss[1] / mrss[0], 2), mrss[2]]
+                            fw.write(str(mrss[0]) + ", " + str(mrss[1]) + ", " + str(mrss[2]) + "\n")
 
                             for t, r in enumerate(result):
                                 fw.write("\n" + str(t) + " " + str(round(r[0], 4)) + " " + str(round(r[1], 4)) + " " + str(r[2]) + " " + str(r[3]) + " " + str(r[4]))
                             fw.close()
-
-                            # -- append the budget result behind per etime list --
-                            result_profit_list[int((times + 1) / etimes) - 1].append(str(round(avg_profit / (times + 1), 4)) + "\t")
-                            result_budget_list[int((times + 1) / etimes) - 1].append(str(round(avg_budget / (times + 1), 4)) + "\t")
-                            result_avgtime_list[int((times + 1) / etimes) - 1].append(str(round(how_long / (times + 1), 4)) + "\t")
-                            result_totaltime_list[int((times + 1) / etimes) - 1].append(str(how_long) + "\t")
-
-                # print("output2")
-                fw = open("result/mric_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
-                          data_name + "_" + product_name + "_profit.txt", 'w')
-                for line in result_profit_list:
-                    for l in line:
-                        fw.write(str(l))
-                    fw.write("\n")
-                fw.close()
-                fw = open("result/mric_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
-                          data_name + "_" + product_name + "_avgtime.txt", 'w')
-                for line in result_avgtime_list:
-                    for l in line:
-                        fw.write(str(l))
-                    fw.write("\n")
-                fw.close()
-                fw = open("result/mric_pps" + str(pp_strategy) + "_winob" * whether_infect_not_only_buying + "/" +
-                          data_name + "_" + product_name + "_totaltime.txt", 'w')
-                for line in result_totaltime_list:
-                    for l in line:
-                        fw.write(str(l))
-                    fw.write("\n")
-                fw.close()
