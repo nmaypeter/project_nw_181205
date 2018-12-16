@@ -1,8 +1,5 @@
-import time
-import copy
 from random import choice
-from Initialization import *
-from Diffusion_NormalIC import *
+from Evaluation import *
 
 class SeedSelection_R():
     def __init__(self, graph_dict, seed_cost_dict, product_list, total_budget, pps, whether_infect_not_only_buying):
@@ -100,14 +97,14 @@ if __name__ == "__main__":
     pro_k_list, bud_k_list = [0.0 for _ in range(num_product)], [0.0 for _ in range(num_product)]
 
     ssr = SeedSelection_R(graph_dict, seed_cost_dict, product_list, total_budget, pp_strategy, whether_infect_not_only_buying)
-    dnic = D_NormalIC(graph_dict, seed_cost_dict, product_list, total_budget, pp_strategy, whether_infect_not_only_buying)
+    dnic = D_NormalIC(graph_dict, seed_cost_dict, product_list, pp_strategy, whether_infect_not_only_buying)
 
     notban_set = [{i for i in graph_dict} for _ in range(num_product)]
     notban_set = ssr.updateNotbanSet(notban_set, 0)
 
-    # -- initialization for each execution_times --
+    # -- initialization for each sample_number --
     ### now_profit, now_budget: (float) the profit and budget in this execution_time
-    now_profit, now_budget = 0.0, 0.0
+    now_budget = 0.0
     ### seed_set: (list) the seed set
     ### seed_set[k]: (set) the seed set for k-product
     ### activated_node_set: (list) the activated node set
@@ -129,17 +126,18 @@ if __name__ == "__main__":
         for k in range(num_product):
             if mep_i_node in nban_set[k]:
                 nban_set[k].remove(mep_i_node)
-        seed_set, activated_node_set, current_k_profit, current_k_budget, current_wallet_list, personal_prob_list = \
+        seed_set, activated_node_set, current_k_budget, current_wallet_list, personal_prob_list = \
             dnic.insertSeedIntoSeedSet(mep_k_prod, mep_i_node, seed_set, activated_node_set, current_wallet_list, personal_prob_list)
-        pro_k_list[mep_k_prod] += round(current_k_profit, 4)
         bud_k_list[mep_k_prod] += round(current_k_budget, 4)
-        now_profit += current_k_profit
         now_budget += current_k_budget
         nban_set = ssr.updateNotbanSet(nban_set, now_budget)
         mep_k_prod, mep_i_node = ssr.selectRandomSeed(nban_set)
 
     # print("result")
-    now_num_k_seed, now_num_k_an = [len(k) for k in seed_set], [len(k) for k in activated_node_set]
+    eva = Evaluation(graph_dict, seed_cost_dict, product_list, pp_strategy, whether_infect_not_only_buying)
+    now_profit, now_pro_k_list, now_num_k_an = eva.getSeedProfit(seed_set, wallet_list, [[1.0 for _ in range(num_node)] for _ in range(num_product)])
+
+    now_num_k_seed = [len(k) for k in seed_set]
     result.append([round(now_profit, 4), round(now_budget, 4), now_num_k_seed, now_num_k_an, seed_set])
     avg_profit += now_profit
     avg_budget += now_budget
