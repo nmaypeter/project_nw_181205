@@ -1,4 +1,4 @@
-for m in range(1, 2):
+for m in range(3, 4):
     model_name = " "
     if m == 1:
         model_name = "mngic_pps"
@@ -8,28 +8,32 @@ for m in range(1, 2):
         model_name = "mric_pps"
     for pps in range(1, 4):
         for setting in range(1, 3):
-            for setting2 in range(1, 3):
+            for setting2 in range(3, 4):
                 data_name, product_name = "email", ""
                 if setting == 1:
                     if setting2 == 1:
                         product_name = "item_r1p3n1"
                     elif setting2 == 2:
                         product_name = "item_r1p3n1_a"
+                    elif setting2 == 3:
+                        product_name = "item_r1p3n1_b"
                 elif setting == 2:
                     if setting2 == 1:
                         product_name = "item_r1p3n2"
                     elif setting2 == 2:
                         product_name = "item_r1p3n2_a"
+                    elif setting2 == 3:
+                        product_name = "item_r1p3n2_b"
                 num_ratio, num_price = int(list(product_name)[list(product_name).index('r') + 1]), int(list(product_name)[list(product_name).index('p') + 1])
                 num_product = num_ratio * num_price
-                execution_times, etimes = 100, 10
-                num_exe = int(execution_times / etimes)
+                sample_number, sample_output_number = 100, 10
+                num_exe = int(sample_number / sample_output_number)
                 avgtime, totaltime, profit, budget = [[] for _ in range(num_exe)], [[] for _ in range(num_exe)], [[] for _ in range(num_exe)], [[] for _ in range(num_exe)]
                 for total_budget in range(1, 11):
-                    for e in range(num_exe):
+                    for sample_count in range(num_exe):
                         # try:
                         result_name = "result/" + model_name + str(pps) + "/" + data_name + "_" + product_name + "/" + \
-                                      data_name + "_" + product_name + "_b" + str(total_budget) + "_i" + str((e + 1) * etimes) + ".txt"
+                                      data_name + "_" + product_name + "_b" + str(total_budget) + "_i" + str((sample_count + 1) * sample_output_number) + ".txt"
                         print(result_name)
                         with open(result_name) as f:
                             for lnum, line in enumerate(f):
@@ -37,14 +41,14 @@ for m in range(1, 2):
                                     continue
                                 elif lnum == 2:
                                     (l) = line.split()
-                                    profit[e].append(l[-1])
+                                    profit[sample_count].append(l[-1])
                                 elif lnum == 3:
                                     (l) = line.split()
-                                    budget[e].append(l[-1])
+                                    budget[sample_count].append(l[-1])
                                 elif lnum == 4:
                                     (l) = line.split()
-                                    totaltime[e].append(l[2].rstrip(','))
-                                    avgtime[e].append(l[-1])
+                                    totaltime[sample_count].append(l[2].rstrip(','))
+                                    avgtime[sample_count].append(l[-1])
                                 else:
                                     break
                         f.close()
