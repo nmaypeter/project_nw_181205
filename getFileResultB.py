@@ -1,4 +1,4 @@
-for m in range(1, 2):
+for m in range(3, 4):
     model_name = ""
     if m == 1:
         model_name = "mngic_pps"
@@ -8,18 +8,22 @@ for m in range(1, 2):
         model_name = "mric_pps"
     for pps in range(1, 4):
         for setting in range(1, 3):
-            for setting2 in range(1, 3):
+            for setting2 in range(3, 4):
                 data_name, product_name = "email", ""
                 if setting == 1:
                     if setting2 == 1:
                         product_name = "item_r1p3n1"
                     elif setting2 == 2:
                         product_name = "item_r1p3n1_a"
+                    elif setting2 == 3:
+                        product_name = "item_r1p3n1_b"
                 elif setting == 2:
                     if setting2 == 1:
                         product_name = "item_r1p3n2"
                     elif setting2 == 2:
                         product_name = "item_r1p3n2_a"
+                    elif setting2 == 3:
+                        product_name = "item_r1p3n2_b"
                 num_ratio, num_price = int(list(product_name)[list(product_name).index('r') + 1]), int(list(product_name)[list(product_name).index('p') + 1])
                 num_product = num_ratio * num_price
                 ratio_profit, ratio_budget = [[] for _ in range(num_product)], [[] for _ in range(num_product)]
