@@ -54,6 +54,7 @@ if __name__ == "__main__":
 
                         for sample_count in range(sample_number):
                             # print("sample_count = " + str(sample_count))
+                            print("pps = " + str(pp_strategy) + ", setting = " + str(setting) + ", product = " + product_name)
                             print("budget = " + str(bud) + ", iteration = " + str(sample_count) + ", pp_strategy = " + str(pp_strategy) +
                                   ", whether_infect_not_only_buying = " + str(whether_infect_not_only_buying))
                             now_budget = 0.0
